@@ -1,0 +1,123 @@
+// ============================================================
+// Prisma Schema - Family Tree
+// ============================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================================
+// Models
+// ============================================================
+
+/// User account (basic auth integration)
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  username  String    @unique
+  firstName String?
+  lastName  String?
+  locale    String    @default("en")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  trees     FamilyTree[]
+
+  @@map("users")
+}
+
+/// Family tree container (represents a genealogy project)
+model FamilyTree {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  ownerId     Int      // FK → User.id
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner    User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members  FamilyMember[]
+  edges    FamilyEdge[]
+
+  @@index([ownerId])
+  @@map("trees")
+}
+
+/// Person node in the family tree
+model FamilyMember {
+  id         String   @id @default(uuid())
+  treeId     String   // FK → FamilyTree.id
+  name       String
+  gender     Gender   @default(UNKNOWN)
+  birthYear  Int?     // YYYY format, e.g., 1980
+  deathYear  Int?     // YYYY format, e.g., 2050
+  birthPlace String?
+  note       String?
+  avatarUrl  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  tree              FamilyTree  @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  parents           FamilyEdge[] @relation("EdgeSource")
+  children          FamilyEdge[] @relation("EdgeTarget")
+
+  @@unique([treeId, id]) // Composite uniqueness within tree
+  @@index([treeId])
+  @@map("members")
+}
+
+/// Relationship edge between two members
+model FamilyEdge {
+  id            String   @id @default(uuid())
+  treeId        String   // FK → FamilyTree.id
+  sourceId      String   // FK → FamilyMember.id
+  targetId      String   // FK → FamilyMember.id
+  type          RelationshipType
+  marriageYear  Int?     // For spouse type
+  divorceYear   Int?     // For spouse type
+  adoptionYear  Int?     // For adoptive-parent type
+  bondYear      Int?     // For sibling-bond type
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  tree     FamilyTree  @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  source   FamilyMember @relation("EdgeSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target   FamilyMember @relation("EdgeTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  // Enforce no duplicate edges of same type between same pair
+  @@unique([treeId, sourceId, targetId, type])
+  @@index([treeId])
+  @@index([sourceId])
+  @@index([targetId])
+  @@map("edges")
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum Gender {
+  MALE
+  FEMALE
+  UNKNOWN
+
+  @@map("gender_enum")
+}
+
+enum RelationshipType {
+  PARENT_CHILD      @map("parent-child")
+  ADOPTIVE_PARENT   @map("adoptive-parent")
+  SPOUSE            @map("spouse")
+  SIBLING_BOND      @map("sibling-bond")
+
+  @@map("relationship_type_enum")
+}

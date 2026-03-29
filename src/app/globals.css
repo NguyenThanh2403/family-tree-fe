@@ -1,239 +1,209 @@
 @import "tailwindcss";
 
-/* ========================================================
-   Family Tree Design System — Global Styles
-   ======================================================== */
+/* Enable class-based dark mode via data-theme attribute */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* 1. CSS Custom Properties (Design Tokens) */
+/* =============================================
+   Design Tokens — 4px base scale
+   ============================================= */
 :root {
-  /* Brand Colors — Warm Gold & Deep Burgundy palette */
-  --color-primary: #8B5E3C;
-  --color-primary-light: #B8865A;
-  --color-primary-dark: #5C3D28;
-  --color-secondary: #C9A96E;
-  --color-secondary-light: #E0CA9E;
-  --color-accent: #2D6A4F;
-  --color-accent-light: #52B788;
+  /* Spacing: multiples of 4px */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
 
-  /* Neutrals */
-  --color-bg: #FDFAF6;
-  --color-bg-alt: #F5EFE6;
-  --color-bg-card: #FFFFFF;
-  --color-text: #2C1810;
-  --color-text-secondary: #6B5B4E;
-  --color-text-muted: #9C8B7E;
-  --color-border: #E8DDD0;
-  --color-border-light: #F0E8DC;
+  /* Brand palette — rose/crimson */
+  --color-brand-50:  #fff0f7;
+  --color-brand-100: #ffe0f0;
+  --color-brand-200: #fecdd3;
+  --color-brand-300: #fda4c8;
+  --color-brand-400: #f472a8;
+  --color-brand-500: #ec4899;
+  --color-brand-600: #db2777;
+  --color-brand-700: #be185d;
+  --color-brand-800: #9d174d;
+  --color-brand-900: #831843;
 
-  /* Semantic */
-  --color-error: #DC2626;
-  --color-error-light: #FEE2E2;
-  --color-success: #16A34A;
-  --color-success-light: #DCFCE7;
-  --color-warning: #D97706;
-  --color-warning-light: #FEF3C7;
+  /* Neutral palette */
+  --color-neutral-50:  #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(44, 24, 16, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(44, 24, 16, 0.07), 0 2px 4px -2px rgba(44, 24, 16, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(44, 24, 16, 0.08), 0 4px 6px -4px rgba(44, 24, 16, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(44, 24, 16, 0.1), 0 8px 10px -6px rgba(44, 24, 16, 0.06);
-  --shadow-glow: 0 0 20px rgba(139, 94, 60, 0.15);
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-warning-500: #f59e0b;
+  --color-success-500: #22c55e;
+  --color-info-500: #3b82f6;
 
-  /* Typography */
-  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-display: "Playfair Display", Georgia, serif;
+  /* ── Dark theme semantic tokens (default) ──
+     Matches the tree-viewer palette exactly. */
+  --background:      #180d12;
+  --foreground:      #f0e6ed;
+  --surface:         #1f1118;
+  --surface-raised:  #261620;
+  --surface-active:  #3a1e2e;
+  --border:          #3d2535;
+  --border-hover:    #5a3548;
+  --accent:          #db2777;
+  --accent-hover:    #be185d;
+  --accent-faint:    rgba(219, 39, 119, 0.12);
+  --text-primary:    #f0e6ed;
+  --text-secondary:  #e8d5df;
+  --text-muted:      #9d8090;
 
   /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* Tree-specific colors (dark mode) */
+  --tree-parent-child:      #4a90d9;    /* Blue */
+  --tree-adoptive:          #38bdf8;    /* Cyan */
+  --tree-spouse:            #db2777;    /* Rose/Pink */
+  --tree-sibling-bond:      #c084fc;    /* Purple */
+  --tree-bg:                #1f1118;    /* Dark surface */
+  --tree-border:            #3d2535;    /* Dark border */
+  --tree-border-light:      #5a3548;    /* Lighter border */
+  --tree-male:              #4a90d9;    /* Blue (male) */
+  --tree-female:            #db2777;    /* Rose (female) */
+  --tree-neutral:           #5a3548;    /* Gray (unknown) */
+  --tree-button-text:       #9d8090;    /* Muted text */
+  --tree-minimap-mask:      rgba(24, 13, 18, 0.75);  /* Semi-transparent dark */
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Shadow */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+
+  /* Typography scale */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+
+  /* Z-index scale */
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
 }
 
-/* 2. Dark Mode Tokens */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #1A1210;
-    --color-bg-alt: #231C18;
-    --color-bg-card: #2C231E;
-    --color-text: #F5EFE6;
-    --color-text-secondary: #C4B5A5;
-    --color-text-muted: #8C7D6E;
-    --color-border: #3D3230;
-    --color-border-light: #4A3E3A;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 20px rgba(201, 169, 110, 0.1);
-  }
+/* =============================================
+   Light theme overrides  — soft, low-contrast warm palette
+   ============================================= */
+[data-theme="light"] {
+  --background:      #f5eff3;   /* warm rose-tinted off-white, not stark white */
+  --foreground:      #2c1a22;   /* softer dark (not near-black) */
+  --surface:         #f9f4f7;   /* very light pinkish surface */
+  --surface-raised:  #f0e8ee;   /* soft rose tint */
+  --surface-active:  #e4d3de;   /* medium soft rose */
+  --border:          #d8c4d2;   /* warm muted border */
+  --border-hover:    #b8909f;   /* medium warm pink-hover */
+  --accent:          #c4326e;   /* slightly muted rose (less glaring than #db2777) */
+  --accent-hover:    #a8295d;
+  --accent-faint:    rgba(196, 50, 110, 0.08);
+  --text-primary:    #2c1a22;   /* warm dark, not pure black */
+  --text-secondary:  #4a2c3e;   /* medium-dark rose-brown */
+  --text-muted:      #85616e;   /* warm muted */
+
+  /* Tree-specific colors (light mode) — desaturated & softened for comfort */
+  --tree-parent-child:      #4080c8;    /* medium blue (softer than #0052cc) */
+  --tree-adoptive:          #2896b0;    /* medium cyan */
+  --tree-spouse:            #c4326e;    /* muted rose */
+  --tree-sibling-bond:      #8b5cf6;    /* medium purple (not dark #7c3aed) */
+  --tree-bg:                #f5eff3;    /* warm off-white (matches background) */
+  --tree-border:            #d8c4d2;    /* warm soft border */
+  --tree-border-light:      #c0a0b8;    /* medium warm border */
+  --tree-male:              #4080c8;    /* medium blue */
+  --tree-female:            #c4326e;    /* muted rose */
+  --tree-neutral:           #998090;    /* warm gray */
+  --tree-button-text:       #7a5b68;    /* warm muted text */
+  --tree-minimap-mask:      rgba(245, 239, 243, 0.75);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
 }
 
-/* 3. Base Reset & Typography */
-* {
-  margin: 0;
-  padding: 0;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* =============================================
+   Base styles
+   ============================================= */
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
 html {
+  -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.6;
-  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-a {
-  color: var(--color-primary);
+/* Skip to content link for accessibility */
+.skip-link {
+  position: fixed;
+  transform: translateY(-200%);
+  left: var(--space-4);
+  top: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius-md);
+  z-index: var(--z-toast);
+  transition: transform 0.2s;
   text-decoration: none;
-  transition: color var(--transition-fast);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+}
+.skip-link:focus {
+  transform: translateY(0);
 }
 
-a:hover {
-  color: var(--color-primary-dark);
-}
-
-/* 4. Keyframe Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(139, 94, 60, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(139, 94, 60, 0.4); }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s var(--transition-base) both;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease both;
-}
-
-.animate-slide-in-right {
-  animation: slideInRight 0.5s ease both;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.4s ease both;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* 5. Utility Classes */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-@media (prefers-color-scheme: dark) {
-  .glass {
-    background: rgba(44, 35, 30, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-bg-alt);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
-
-/* Focus Ring */
+/* Focus ring */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
 }
+
+/* React Flow canvas overrides */
+.react-flow__node {
+  font-family: var(--font-sans);
+}
+

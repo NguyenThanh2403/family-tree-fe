@@ -1,0 +1,687 @@
+openapi: 3.0.3
+info:
+  title: Family Tree API
+  description: |
+    RESTful API for managing family trees, members, and relationships.
+    
+    **Key Concepts:**
+    - **Tree**: A genealogy project containing multiple members and their relationships
+    - **Member**: A person node in the tree (with personal info: name, gender, birth/death year, etc.)
+    - **Edge**: A relationship between two members (parent-child, spouse, adoptive-parent, sibling-bond)
+    
+    **Relationship Types:**
+    - `parent-child`: Biological parent-child (max 2 per child)
+    - `adoptive-parent`: Adoptive parent (unlimited per child)
+    - `spouse`: Marriage (with optional marriage/divorce years)
+    - `sibling-bond`: Sibling tie / bonded siblings
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://familytree.example.com/support
+
+servers:
+  - url: https://api.familytree.example.com/api
+    description: Production
+  - url: http://localhost:3000/api
+    description: Development
+
+paths:
+  /trees:
+    get:
+      summary: List all family trees for authenticated user
+      operationId: listTrees
+      tags:
+        - Trees
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Number of results to return
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Offset for pagination
+      responses:
+        '200':
+          description: List of trees
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TreeSummary'
+                  total:
+                    type: integer
+
+    post:
+      summary: Create a new family tree
+      operationId: createTree
+      tags:
+        - Trees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  example: 'Gia phả nhà Nguyễn'
+                description:
+                  type: string
+                  maxLength: 1000
+                  example: 'Cây gia phả dòng họ Nguyễn từ năm 1920'
+      responses:
+        '201':
+          description: Tree created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyTree'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /trees/{treeId}:
+    get:
+      summary: Get full tree (members + edges)
+      operationId: getTree
+      tags:
+        - Trees
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full tree data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyTree'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update tree metadata
+      operationId: updateTree
+      tags:
+        - Trees
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Updated tree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyTree'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete a tree (cascades to members and edges)
+      operationId: deleteTree
+      tags:
+        - Trees
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /trees/{treeId}/members:
+    post:
+      summary: Create a person in the tree
+      operationId: createMember
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemberRequest'
+      responses:
+        '201':
+          description: Member created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyMember'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /trees/{treeId}/members/{memberId}:
+    patch:
+      summary: Update a member
+      operationId: updateMember
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: memberId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemberRequest'
+      responses:
+        '200':
+          description: Updated member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyMember'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete a member (cascades to their edges)
+      operationId: deleteMember
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: memberId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /trees/{treeId}/edges:
+    post:
+      summary: Create a relationship (edge) between two members
+      operationId: createEdge
+      tags:
+        - Relationships
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEdgeRequest'
+      responses:
+        '201':
+          description: Edge created with validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdgeWithValidation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /trees/{treeId}/edges/{edgeId}:
+    patch:
+      summary: Update a relationship (years, etc.)
+      operationId: updateEdge
+      tags:
+        - Relationships
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: edgeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEdgeRequest'
+      responses:
+        '200':
+          description: Updated edge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyEdge'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete a relationship
+      operationId: deleteEdge
+      tags:
+        - Relationships
+      parameters:
+        - in: path
+          name: treeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: edgeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    # ── Tree ──
+    TreeSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        ownerId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    FamilyTree:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        ownerId:
+          type: integer
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/FamilyMember'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/FamilyEdge'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Member ──
+    FamilyMember:
+      type: object
+      required:
+        - id
+        - treeId
+        - name
+        - gender
+      properties:
+        id:
+          type: string
+          format: uuid
+        treeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        gender:
+          type: string
+          enum: ['male', 'female', 'unknown']
+        birthYear:
+          type: integer
+          nullable: true
+          minimum: 1000
+          maximum: 2100
+        deathYear:
+          type: integer
+          nullable: true
+          minimum: 1000
+          maximum: 2100
+        birthPlace:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateMemberRequest:
+      type: object
+      required:
+        - name
+        - gender
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        gender:
+          type: string
+          enum: ['male', 'female', 'unknown']
+        birthYear:
+          type: integer
+          nullable: true
+        deathYear:
+          type: integer
+          nullable: true
+        birthPlace:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+
+    UpdateMemberRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        gender:
+          type: string
+          enum: ['male', 'female', 'unknown']
+        birthYear:
+          type: integer
+          nullable: true
+        deathYear:
+          type: integer
+          nullable: true
+        birthPlace:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+
+    # ── Edge ──
+    FamilyEdge:
+      type: object
+      required:
+        - id
+        - treeId
+        - sourceId
+        - targetId
+        - type
+      properties:
+        id:
+          type: string
+          format: uuid
+        treeId:
+          type: string
+          format: uuid
+        sourceId:
+          type: string
+          format: uuid
+        targetId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: ['parent-child', 'adoptive-parent', 'spouse', 'sibling-bond']
+        marriageYear:
+          type: integer
+          nullable: true
+        divorceYear:
+          type: integer
+          nullable: true
+        adoptionYear:
+          type: integer
+          nullable: true
+        bondYear:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateEdgeRequest:
+      type: object
+      required:
+        - sourceId
+        - targetId
+        - type
+      properties:
+        sourceId:
+          type: string
+          format: uuid
+        targetId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: ['parent-child', 'adoptive-parent', 'spouse', 'sibling-bond']
+        marriageYear:
+          type: integer
+          nullable: true
+        divorceYear:
+          type: integer
+          nullable: true
+        adoptionYear:
+          type: integer
+          nullable: true
+        bondYear:
+          type: integer
+          nullable: true
+
+    UpdateEdgeRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: ['parent-child', 'adoptive-parent', 'spouse', 'sibling-bond']
+        marriageYear:
+          type: integer
+          nullable: true
+        divorceYear:
+          type: integer
+          nullable: true
+        adoptionYear:
+          type: integer
+          nullable: true
+        bondYear:
+          type: integer
+          nullable: true
+
+    EdgeWithValidation:
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/FamilyEdge'
+          nullable: true
+        validation:
+          $ref: '#/components/schemas/ValidationResult'
+
+    ValidationResult:
+      type: object
+      required:
+        - valid
+        - errors
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+
+    ValidationError:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          enum:
+            - SELF_RELATION
+            - DUPLICATE_RELATION
+            - CYCLE_DETECTED
+            - MAX_PARENTS_EXCEEDED
+            - AGE_INCONSISTENCY
+            - INVALID_ADOPTION_YEAR
+            - INVALID_MARRIAGE_YEAR
+            - SPOUSE_TIME_OVERLAP
+            - INVALID_BIRTH_YEAR
+            - INVALID_DEATH_YEAR
+            - NAME_TOO_SHORT
+        field:
+          type: string
+          nullable: true
+
+    # ── Common ──
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          nullable: true
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

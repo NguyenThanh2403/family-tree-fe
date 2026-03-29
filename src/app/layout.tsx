@@ -1,53 +1,65 @@
-import type { Metadata } from "next";
-import { SEO } from "@/lib/constants";
-import { LanguageProvider } from "@/lib/i18n";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
+import { ThemeProvider } from '@/components/ThemeProvider';
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
 
 export const metadata: Metadata = {
   title: {
-    default: SEO.DEFAULT_TITLE,
-    template: SEO.TITLE_TEMPLATE,
+    default: 'Family Tree+',
+    template: '%s | Family Tree+',
   },
-  description: SEO.DEFAULT_DESCRIPTION,
-  keywords: [...SEO.DEFAULT_KEYWORDS],
-  authors: [{ name: "Family Tree Team" }],
-  creator: "Family Tree",
+  description:
+    'Quản lý gia phả trực tuyến — Explore, manage, and analyze your family history interactively.',
+  keywords: ['family tree', 'gia phả', 'genealogy', 'phả hệ', 'Vietnam'],
   openGraph: {
-    type: "website",
-    locale: "vi_VN",
-    title: SEO.DEFAULT_TITLE,
-    description: SEO.DEFAULT_DESCRIPTION,
-    siteName: "Family Tree",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SEO.DEFAULT_TITLE,
-    description: SEO.DEFAULT_DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true },
+    type: 'website',
+    siteName: 'Family Tree+',
+    title: 'Family Tree+ — Quản lý gia phả',
+    description: 'Khám phá và lưu giữ lịch sử gia đình bạn.',
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="vi">
+    <html
+      lang={locale}
+      data-theme="dark"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800&display=swap"
-          rel="stylesheet"
+        {/* Anti-flash: apply saved theme before first paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();`,
+          }}
         />
       </head>
-      <body>
-        <LanguageProvider>{children}</LanguageProvider>
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <ThemeProvider>{children}</ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

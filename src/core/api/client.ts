@@ -1,70 +1,38 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+import axios from 'axios';
 
-/**
- * Base API client configuration.
- * Wraps fetch with default headers and error handling.
- * Platform-agnostic: works in both browser and React Native.
- */
-class ApiClient {
-  private baseUrl: string;
+const apiClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? '/api',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+// Attach Bearer token to every request
+apiClient.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
+  return config;
+});
 
-  private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-
-    // Token will be retrieved from a secure store
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("auth_token");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+// Normalize errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear invalid tokens and redirect to login
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/login';
       }
     }
+    return Promise.reject(error);
+  },
+);
 
-    return headers;
-  }
-
-  async get<T>(endpoint: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "GET",
-      headers: this.getHeaders(),
-    });
-    if (!res.ok) throw new Error(`API Error: ${res.status}`);
-    return res.json();
-  }
-
-  async post<T>(endpoint: string, data?: unknown): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    if (!res.ok) throw new Error(`API Error: ${res.status}`);
-    return res.json();
-  }
-
-  async put<T>(endpoint: string, data?: unknown): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "PUT",
-      headers: this.getHeaders(),
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    if (!res.ok) throw new Error(`API Error: ${res.status}`);
-    return res.json();
-  }
-
-  async delete<T>(endpoint: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: "DELETE",
-      headers: this.getHeaders(),
-    });
-    if (!res.ok) throw new Error(`API Error: ${res.status}`);
-    return res.json();
-  }
-}
-
-export const apiClient = new ApiClient(API_BASE_URL);
+export default apiClient;
