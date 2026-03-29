@@ -3,6 +3,7 @@
 import { X, ArrowRight, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/cn';
+import { useLanguage } from '@/hooks/useLanguage';
 import type { RelationshipAnalysis } from '@/types/relationship.types';
 import type { FamilyMember } from '@/types/tree.types';
 import { Alert } from '@/components/ui/Alert';
@@ -23,6 +24,8 @@ export function RelationshipAnalysisPanel({
   onClose,
 }: RelationshipAnalysisPanelProps) {
   const t = useTranslations('tree.analysis');
+  const commonT = useTranslations('common');
+  const { language } = useLanguage();
 
   return (
     <aside
@@ -42,7 +45,7 @@ export function RelationshipAnalysisPanel({
         </div>
         <button
           onClick={onClose}
-          aria-label="Close panel"
+          aria-label={commonT('close')}
           className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-active)]"
         >
           <X size={16} />
@@ -72,19 +75,19 @@ export function RelationshipAnalysisPanel({
         <dl className="space-y-2 text-sm text-[var(--text-secondary)]">
           {/* Relationship label */}
           <div className="flex items-center justify-between">
-            <dt className="text-[var(--text-muted)]">Quan hệ / Relation</dt>
+            <dt className="text-[var(--text-muted)]">{t('relationship')}</dt>
             <dd className="font-semibold text-[#4ade80]">{analysis.relationshipLabel}</dd>
           </div>
 
           {/* A addresses B */}
           <div className="flex items-center justify-between">
-            <dt className="text-[var(--text-muted)]">{nodeA.name} gọi:</dt>
+            <dt className="text-[var(--text-muted)]">{nodeA.name} {t('addressFromA')}</dt>
             <dd className="font-medium text-[var(--text-primary)]">{analysis.addressFromA}</dd>
           </div>
 
           {/* B addresses A */}
           <div className="flex items-center justify-between">
-            <dt className="text-[var(--text-muted)]">{nodeB.name} gọi:</dt>
+            <dt className="text-[var(--text-muted)]">{nodeB.name} {t('addressFromB')}</dt>
             <dd className="font-medium text-[var(--text-primary)]">{analysis.addressFromB}</dd>
           </div>
 

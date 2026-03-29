@@ -11,6 +11,7 @@ import {
 
 import { useFamilyTree } from '@/hooks/useFamilyTree';
 import { useRelationship } from '@/hooks/useRelationship';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useTreeColors } from '@/hooks/useTreeColors';
 import { Confirm } from '@/components/ui/Confirm';
 import { NodeForm } from '@/components/tree/NodeForm';
@@ -105,6 +106,7 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
   const t  = useTranslations('tree');
   const tc = useTranslations('common');
   const tv = useTranslations('validation');
+  const { language } = useLanguage();
 
   const {
     tree, members, edges, selectedNodeIds,
@@ -148,7 +150,7 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
   // ── Relationship analysis (2 nodes selected) ─────────────────────────────
   const nodeA = members.find((m) => m.id === selectedNodeIds[0]);
   const nodeB = members.find((m) => m.id === selectedNodeIds[1]);
-  const analysis = useRelationship(nodeA, nodeB, edges, 'vi');
+  const analysis = useRelationship(nodeA, nodeB, edges, language);
 
   // ── Derived maps for quick lookups ───────────────────────────────────────
   const memberById = useMemo(() => {
@@ -247,10 +249,10 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
       const pos = group.findIndex((p) => p.id === previewMember.id);
       if (pos === -1) return undefined;
       const nth = pos + 1;
-      const genderLabel = previewMember.gender === 'male' ? 'con trai' : previewMember.gender === 'female' ? 'con gái' : 'con';
-      if (nth === 1 && previewMember.gender === 'male') return 'Trưởng nam';
-      if (nth === group.length) return `Út ${genderLabel}`;
-      return `Thứ ${nth} (${genderLabel})`;
+      const genderLabel = previewMember.gender === 'male' ? t('preview.son') : previewMember.gender === 'female' ? t('preview.daughter') : t('preview.child');
+      if (nth === 1 && previewMember.gender === 'male') return t('preview.eldestSon');
+      if (nth === group.length) return `${t('preview.youngest')} ${genderLabel}`;
+      return `${t('preview.nth')} ${nth} (${genderLabel})`;
     })();
 
     const countAncestors = () => {
@@ -508,15 +510,15 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
         <div className="w-px h-5 mx-0.5" style={{ backgroundColor: colors.border }} />
 
         {/* Zoom controls */}
-        <TBtn colors={colors} onClick={() => canvasControls?.zoomIn()}  title="Phóng to (Zoom in)">  <ZoomIn  size={15} /></TBtn>
-        <TBtn colors={colors} onClick={() => canvasControls?.zoomOut()} title="Thu nhỏ (Zoom out)"> <ZoomOut size={15} /></TBtn>
-        <TBtn colors={colors} onClick={() => canvasControls?.fitView()} title="Vừa màn hình (Fit view)"> <Maximize2 size={15} /></TBtn>
+        <TBtn colors={colors} onClick={() => canvasControls?.zoomIn()}  title={t('preview.zoomIn')}>  <ZoomIn  size={15} /></TBtn>
+        <TBtn colors={colors} onClick={() => canvasControls?.zoomOut()} title={t('preview.zoomOut')}> <ZoomOut size={15} /></TBtn>
+        <TBtn colors={colors} onClick={() => canvasControls?.fitView()} title={t('preview.fitView')}> <Maximize2 size={15} /></TBtn>
 
         <div className="w-px h-5 mx-0.5" style={{ backgroundColor: colors.border }} />
 
         {/* Undo / Redo (UI placeholders) */}
-        <TBtn colors={colors} title="Hoàn tác (Undo)"  onClick={() => {}}><Undo2 size={15} /></TBtn>
-        <TBtn colors={colors} title="Làm lại (Redo)"   onClick={() => {}}><Redo2 size={15} /></TBtn>
+        <TBtn colors={colors} title={t('preview.undo')}  onClick={() => {}}><Undo2 size={15} /></TBtn>
+        <TBtn colors={colors} title={t('preview.redo')}   onClick={() => {}}><Redo2 size={15} /></TBtn>
 
         <div className="w-px h-5 mx-0.5" style={{ backgroundColor: colors.border }} />
 
@@ -524,7 +526,7 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
         <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: colors.border }}>
           <button
             onClick={() => setLayoutDir('vertical')}
-            title="Bố cục dọc"
+            title={t('preview.layoutVertical')}
             style={{
               backgroundColor: layoutDir === 'vertical' ? colors.spouse : 'transparent',
               color: layoutDir === 'vertical' ? 'white' : colors.buttonText,
@@ -532,11 +534,11 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
             className="flex items-center gap-1 px-2.5 h-8 text-xs font-medium transition-opacity hover:opacity-80"
           >
             <LayoutTemplate size={13} />
-            <span className="hidden md:inline">Dọc</span>
+            <span className="hidden md:inline">{t('preview.layoutVertical').split(' ')[0]}</span>
           </button>
           <button
             onClick={() => setLayoutDir('horizontal')}
-            title="Bố cục ngang"
+            title={t('preview.layoutHorizontal')}
             style={{
               backgroundColor: layoutDir === 'horizontal' ? colors.spouse : 'transparent',
               color: layoutDir === 'horizontal' ? 'white' : colors.buttonText,
@@ -545,7 +547,7 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
             className="flex items-center gap-1 px-2.5 h-8 text-xs font-medium transition-opacity hover:opacity-80"
           >
             <AlignCenter size={13} />
-            <span className="hidden md:inline">Ngang</span>
+            <span className="hidden md:inline">{t('preview.layoutHorizontal').split(' ')[0]}</span>
           </button>
         </div>
 
@@ -554,7 +556,7 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
         {/* Mini-map toggle */}
         <TBtn
           colors={colors}
-          title={showMinimap ? 'Ẩn minimap' : 'Hiện minimap'}
+          title={showMinimap ? t('preview.hideMinimap') : t('preview.showMinimap')}
           active={showMinimap}
           onClick={() => {
             setShowMinimap((v) => !v);
@@ -567,7 +569,7 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
         {/* Stats panel toggle */}
         <TBtn
           colors={colors}
-          title="Thống kê"
+          title={t('preview.stats')}
           active={showStats}
           onClick={() => setShowStats((v) => !v)}
         >
@@ -615,20 +617,30 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
               style={{ color: colors.buttonText }}
               className="text-xs px-2 h-8 rounded-lg hover:opacity-80 transition-opacity"
             >
-              Bỏ chọn
+              {t('preview.deselect')}
             </button>
           </>
         )}
 
         {/* Search */}
-        <div className="ml-auto flex items-center gap-2 bg-[#261620] border border-[#3d2535] rounded-lg px-2.5 h-8 w-48 md:w-64">
+        <div className="ml-auto flex items-center gap-2 rounded-lg px-2.5 h-8 w-48 md:w-64"
+          style={{
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}>
           <Search size={13} className="text-[#9d8090] shrink-0" />
           <input
             type="text"
-            placeholder="Tìm kiếm..."
+            placeholder={t('preview.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-sm text-white placeholder:text-[#9d8090] outline-none w-full"
+            className="bg-transparent text-sm outline-none w-full placeholder:opacity-60"
+            style={{
+              color: 'var(--text-primary)',
+              backgroundColor: 'transparent',
+              outline: 'none',
+              boxShadow: 'none',
+            }}
           />
         </div>
       </div>
@@ -649,17 +661,16 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
               <TreeIllustration />
             </div>
             <div className="text-center space-y-2">
-              <h2 className="text-xl font-bold text-white">Your Family Tree Awaits</h2>
+              <h2 className="text-xl font-bold text-white">{t('preview.emptyTreeTitle')}</h2>
               <p className="text-[#9d8090] text-sm max-w-xs leading-relaxed">
-                Start building your family tree by adding your first family member.
-                Click the &apos;Add Person&apos; button to begin your journey.
+                {t('preview.emptyTreeDesc')}
               </p>
             </div>
             <button
               onClick={() => setNodeFormCtx({ mode: 'create' })}
               className="px-6 py-2.5 rounded-full bg-[#db2777]/20 border border-[#db2777] text-[#db2777] text-sm font-semibold hover:bg-[#db2777] hover:text-white transition-all duration-200"
             >
-              Add First Person
+              {t('preview.addFirstPerson')}
             </button>
           </div>
         ) : (
@@ -701,38 +712,38 @@ export function TreeViewerClient({ treeId }: TreeViewerClientProps) {
         {showStats && members.length > 0 && (
           <div className="absolute top-3 right-3 z-20 rounded-xl border border-[#3d2535] bg-[#1f1118]/90 backdrop-blur-sm p-4 min-w-[160px] shadow-xl text-sm">
             <div className="flex items-center justify-between mb-3">
-              <span className="font-semibold text-white">Thống kê</span>
+              <span className="font-semibold text-white">{t('preview.stats')}</span>
               <button
                 onClick={() => setShowStats(false)}
                 className="text-[#9d8090] hover:text-white text-xs leading-none ml-4"
-                aria-label="Đóng"
+                aria-label={t('preview.close')}
               >✕</button>
             </div>
             <div className="space-y-1.5 text-[#9d8090]">
               <div className="flex justify-between gap-4">
-                <span>Tổng số người</span>
+                <span>{t('preview.totalPeople')}</span>
                 <span className="text-white font-medium">{members.length}</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span>Nam</span>
+                <span>{t('preview.maleCount')}</span>
                 <span className="text-[#4a90d9] font-medium">
                   {members.filter((m) => m.gender === 'male').length}
                 </span>
               </div>
               <div className="flex justify-between gap-4">
-                <span>Nữ</span>
+                <span>{t('preview.femaleCount')}</span>
                 <span className="text-[#db2777] font-medium">
                   {members.filter((m) => m.gender === 'female').length}
                 </span>
               </div>
               <div className="flex justify-between gap-4">
-                <span>Đã mất</span>
+                <span>{t('preview.deceased')}</span>
                 <span className="text-[#9d8090] font-medium">
                   {members.filter((m) => !!m.deathYear).length}
                 </span>
               </div>
               <div className="flex justify-between gap-4">
-                <span>Quan hệ</span>
+                <span>{t('preview.relationships')}</span>
                 <span className="text-white font-medium">{edges.length}</span>
               </div>
             </div>

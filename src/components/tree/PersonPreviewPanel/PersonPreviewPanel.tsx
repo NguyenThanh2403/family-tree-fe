@@ -2,6 +2,7 @@
 
 import { memo, Children } from 'react';
 import { X, User, MapPin, Heart, Users, Baby, Star, Info, ChevronRight, UserCheck, GitMerge } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/cn';
 import type { FamilyMember } from '@/types/tree.types';
 
@@ -38,11 +39,13 @@ const badge = (label: string, tone: 'pink' | 'blue' | 'neutral' = 'neutral') => 
 };
 
 export const PersonPreviewPanel = memo(function PersonPreviewPanel({ data, onClose, onEdit }: PersonPreviewPanelProps) {
+  const t = useTranslations('tree.preview');
+  const tm = useTranslations('tree.member');
   const { member, father, mother, otherParents = [], spouses, children, siblings, adoptiveParents = [], bondedSiblings = [], eldestSon, ancestorCount, descendantCount } = data;
 
   const lifespan = member.birthYear
     ? `${member.birthYear}${member.deathYear ? ` – ${member.deathYear}` : ''}`
-    : 'Chưa rõ năm sinh';
+    : t('unknownBirthYear');
 
   return (
     <aside
@@ -56,9 +59,9 @@ export const PersonPreviewPanel = memo(function PersonPreviewPanel({ data, onClo
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <div className={badge(member.gender === 'female' ? 'Nữ' : member.gender === 'male' ? 'Nam' : 'Khác', member.gender === 'female' ? 'pink' : member.gender === 'male' ? 'blue' : 'neutral')}>
+            <div className={badge(member.gender === 'female' ? tm('female') : member.gender === 'male' ? tm('male') : tm('unknown'), member.gender === 'female' ? 'pink' : member.gender === 'male' ? 'blue' : 'neutral')}>
               <User size={13} />
-              <span>{member.gender === 'female' ? 'Nữ' : member.gender === 'male' ? 'Nam' : 'Khác'}</span>
+              <span>{member.gender === 'female' ? tm('female') : member.gender === 'male' ? tm('male') : tm('unknown')}</span>
             </div>
             <div className={badge(lifespan, 'neutral')}>{lifespan}</div>
           </div>
@@ -71,16 +74,16 @@ export const PersonPreviewPanel = memo(function PersonPreviewPanel({ data, onClo
           )}
         </div>
         <div className="flex items-center gap-2">
-          <div className={badge(`${ancestorCount} tổ tiên`, 'neutral')}>
-            {ancestorCount} tổ tiên
+          <div className={badge(`${ancestorCount} ${t('ancestors')}`, 'neutral')}>
+            {ancestorCount} {t('ancestors')}
           </div>
-          <div className={badge(`${descendantCount} hậu duệ`, 'neutral')}>
-            {descendantCount} hậu duệ
+          <div className={badge(`${descendantCount} ${t('descendants')}`, 'neutral')}>
+            {descendantCount} {t('descendants')}
           </div>
           {onClose && (
             <button
               onClick={onClose}
-              aria-label="Đóng"
+              aria-label={t('close')}
               className="rounded-full p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-active)]"
             >
               <X size={16} />
@@ -90,49 +93,49 @@ export const PersonPreviewPanel = memo(function PersonPreviewPanel({ data, onClo
       </div>
 
       {/* Spouse(s) */}
-      <Section title="Vợ/Chồng" icon={<Heart size={14} className="text-[#db2777]" aria-hidden />} empty="Chưa có dữ liệu">
+      <Section title={t('spouse')} icon={<Heart size={14} className="text-[#db2777]" aria-hidden />} empty={t('noSpouseData')}>
         {spouses.map((sp) => (
           <Row key={sp.person.id}
             primary={sp.person.name}
-            secondary={sp.person.birthYear ? `b. ${sp.person.birthYear}` : undefined}
-            meta={sp.marriageYear ? `Kết hôn ${sp.marriageYear}${sp.divorceYear ? ` – ${sp.divorceYear}` : ''}` : 'Chưa rõ năm kết hôn'}
+            secondary={sp.person.birthYear ? `${t('birth')} ${sp.person.birthYear}` : undefined}
+            meta={sp.marriageYear ? `${t('married')} ${sp.marriageYear}${sp.divorceYear ? ` – ${sp.divorceYear}` : ''}` : t('unknownMarriedYear')}
           />
         ))}
       </Section>
 
       {/* Parents */}
-      <Section title="Cha/Mẹ" icon={<Users size={14} className="text-[#4a90d9]" aria-hidden />} empty="Chưa rõ">
-        <Row primary={father?.name ?? 'Chưa rõ'} meta={father ? 'Cha' : undefined} muted={!father} />
-        <Row primary={mother?.name ?? 'Chưa rõ'} meta={mother ? 'Mẹ' : undefined} muted={!mother} />
+      <Section title={t('parent')} icon={<Users size={14} className="text-[#4a90d9]" aria-hidden />} empty={t('unknown')}>
+        <Row primary={father?.name ?? t('unknown')} meta={father ? t('father') : undefined} muted={!father} />
+        <Row primary={mother?.name ?? t('unknown')} meta={mother ? t('mother') : undefined} muted={!mother} />
         {otherParents.map((p) => (
-          <Row key={p.id} primary={p.name} meta="Giám hộ" />
+          <Row key={p.id} primary={p.name} meta={t('guardianship')} />
         ))}
       </Section>
 
       {/* Adoptive Parents */}
       {adoptiveParents.length > 0 && (
-        <Section title="Cha/Mẹ nuôi" icon={<UserCheck size={14} className="text-[#22d3ee]" aria-hidden />}>
+        <Section title={t('adoptiveParent')} icon={<UserCheck size={14} className="text-[#22d3ee]" aria-hidden />}>
           {adoptiveParents.map(({ person, adoptionYear }) => (
             <Row
               key={person.id}
               primary={person.name}
-              secondary={person.birthYear ? `b. ${person.birthYear}` : undefined}
-              meta={adoptionYear ? `Nhận nuôi ${adoptionYear}` : 'Cha/Mẹ nuôi'}
+              secondary={person.birthYear ? `${t('birth')} ${person.birthYear}` : undefined}
+              meta={adoptionYear ? `${t('adoptedYear')} ${adoptionYear}` : t('adoptiveParent')}
             />
           ))}
         </Section>
       )}
 
       {/* Children */}
-      <Section title="Con" icon={<Baby size={14} className="text-[#4a90d9]" aria-hidden />} empty="Chưa có con">
+      <Section title={t('child')} icon={<Baby size={14} className="text-[#4a90d9]" aria-hidden />} empty={t('noChildren')}>
         {children.map((child, idx) => {
           const isEldest = eldestSon && eldestSon.id === child.id;
           return (
             <Row
               key={child.id}
               primary={child.name}
-              secondary={child.birthYear ? `b. ${child.birthYear}` : undefined}
-              meta={isEldest ? 'Trưởng nam' : `Thứ ${idx + 1}`}
+              secondary={child.birthYear ? `${t('birth')} ${child.birthYear}` : undefined}
+              meta={isEldest ? t('eldestSon') : `${t('nth')} ${idx + 1}`}
               highlight={isEldest}
             />
           );
@@ -140,24 +143,24 @@ export const PersonPreviewPanel = memo(function PersonPreviewPanel({ data, onClo
       </Section>
 
       {/* Siblings */}
-      <Section title="Anh/Chị/Em" icon={<Users size={14} className="text-[#9d8090]" aria-hidden />} empty="Không có dữ liệu">
+      <Section title={t('sibling')} icon={<Users size={14} className="text-[#9d8090]" aria-hidden />} empty={t('noSiblingData')}>
         {data.birthOrderLabel && (
-          <Row primary={data.birthOrderLabel} meta="Vị trí trong gia đình" />
+          <Row primary={data.birthOrderLabel} meta={t('birthOrder')} />
         )}
         {siblings.map((sib) => (
-          <Row key={sib.id} primary={sib.name} secondary={sib.birthYear ? `b. ${sib.birthYear}` : undefined} />
+          <Row key={sib.id} primary={sib.name} secondary={sib.birthYear ? `${t('birth')} ${sib.birthYear}` : undefined} />
         ))}
       </Section>
 
       {/* Bonded siblings */}
       {bondedSiblings.length > 0 && (
-        <Section title="Anh em kết nghĩa" icon={<GitMerge size={14} className="text-[#a855f7]" aria-hidden />}>
+        <Section title={t('bondedSibling')} icon={<GitMerge size={14} className="text-[#a855f7]" aria-hidden />}>
           {bondedSiblings.map(({ person, bondYear }) => (
             <Row
               key={person.id}
               primary={person.name}
-              secondary={person.birthYear ? `b. ${person.birthYear}` : undefined}
-              meta={bondYear ? `Kết nghĩa ${bondYear}` : 'Anh em kết nghĩa'}
+              secondary={person.birthYear ? `${t('birth')} ${person.birthYear}` : undefined}
+              meta={bondYear ? `${t('bondYear')} ${bondYear}` : t('bondedSibling')}
             />
           ))}
         </Section>
@@ -165,7 +168,7 @@ export const PersonPreviewPanel = memo(function PersonPreviewPanel({ data, onClo
 
       {/* Notes */}
       {member.note && (
-        <Section title="Ghi chú" icon={<Info size={14} className="text-[#db2777]" aria-hidden />}>
+        <Section title={t('notes')} icon={<Info size={14} className="text-[#db2777]" aria-hidden />}>
           <p className="text-sm text-[var(--text-muted)] leading-relaxed whitespace-pre-wrap">{member.note}</p>
         </Section>
       )}
@@ -174,14 +177,14 @@ export const PersonPreviewPanel = memo(function PersonPreviewPanel({ data, onClo
       <div className="flex items-center justify-between pt-1">
         <div className="text-xs text-[var(--text-muted)] flex items-center gap-1">
           <ChevronRight size={12} />
-          Nhấn node khác để xem nhanh thông tin
+          {t('clickNodeInfo')}
         </div>
         {onEdit && (
           <button
             onClick={() => onEdit(member.id)}
             className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] shadow-sm"
           >
-            Chỉnh sửa
+            {t('edit')}
           </button>
         )}
       </div>

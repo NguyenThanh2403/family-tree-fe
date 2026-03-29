@@ -11,6 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LoginPage() {
   const t = await getTranslations('auth');
   const tw = await getTranslations('welcome');
+  const tc = await getTranslations('common');
 
   const features = [
     { Icon: Users, title: tw('feature1Title'), desc: tw('feature1Desc') },
@@ -37,7 +38,7 @@ export default async function LoginPage() {
               <TreePine size={52} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Family Tree+</h1>
+              <h1 className="text-3xl font-bold tracking-tight">{tc('appName')}</h1>
               <p className="text-pink-200 text-sm mt-2 leading-relaxed">{tw('subtitle')}</p>
             </div>
           </div>
@@ -70,7 +71,7 @@ export default async function LoginPage() {
             <div className="p-3 bg-[var(--surface-active)] rounded-2xl border border-[var(--border)]">
               <TreePine size={32} className="text-[var(--accent)]" />
             </div>
-            <span className="text-xl font-bold text-[var(--text-primary)]">Family Tree+</span>
+            <span className="text-xl font-bold text-[var(--text-primary)]">{tc('appName')}</span>
           </div>
 
           <div className="mb-8">

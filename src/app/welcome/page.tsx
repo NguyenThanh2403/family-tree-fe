@@ -55,7 +55,7 @@ export default async function WelcomePage() {
         aria-labelledby="features-heading"
         className="max-w-4xl mx-auto px-4 pb-20"
       >
-        <h2 id="features-heading" className="sr-only">Features</h2>
+        <h2 id="features-heading" className="sr-only">{t('featuresHeading')}</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {features.map(({ icon: Icon, title, desc }) => (
             <div

@@ -21,6 +21,7 @@ interface AuthState {
   ) => Promise<void>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
+  updateUser: (user: User) => void;
   clearError: () => void;
 }
 
@@ -153,6 +154,10 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           set({ isLoading: false });
         }
+      },
+
+      updateUser: (user: User) => {
+        set({ user });
       },
 
       clearError: () => set({ error: null }),

@@ -7,7 +7,7 @@ export interface User {
   lastName: string;
   displayName?: string;
   avatarUrl?: string;
-  locale?: 'en' | 'vi';
+  locale?: 'en' | 'vi' | 'zh' | 'ko' | 'ja' | 'th';
   createdAt?: string;
 }
 
