@@ -6,6 +6,7 @@ import type {
 } from '@/types/relationship.types';
 import type { FamilyMember, FamilyEdge } from '@/types/tree.types';
 import { resolveRelationshipLabel } from './address-resolver';
+import type { Locale } from '@/i18n';
 
 // ============================================================
 // Graph construction
@@ -124,22 +125,28 @@ export function analyzeRelationship(
   nodeA: FamilyMember,
   nodeB: FamilyMember,
   edges: FamilyEdge[],
-  locale: 'en' | 'vi' = 'vi',
+  locale: Locale = 'vi',
 ): RelationshipAnalysis {
   const graph = buildAdjacencyGraph(edges);
   const path = findPath(graph, nodeA.id, nodeB.id);
 
   if (path === null) {
+    const noPathMessages: Record<Locale, string> = {
+      en: 'No family connection found between these two people.',
+      vi: 'Không tìm thấy mối liên hệ giữa hai người này.',
+      zh: '未找到这两个人之间的家族联系。',
+      ko: '이 두 사람 사이의 가족 관계를 찾을 수 없습니다.',
+      ja: 'これら2人の間の家族のつながりが見つかりません。',
+      th: 'ไม่พบความสัมพันธ์ครอบครัวระหว่างสองคนนี้',
+    };
+
     return {
       found: false,
       relationshipLabel: '',
       addressFromA: '',
       addressFromB: '',
       generationDelta: 0,
-      description:
-        locale === 'vi'
-          ? 'Không tìm thấy mối liên hệ giữa hai người này.'
-          : 'No family connection found between these two people.',
+      description: noPathMessages[locale] ?? noPathMessages.en,
       pathIds: [],
     };
   }
@@ -156,10 +163,16 @@ export function analyzeRelationship(
     locale,
   );
 
-  const description =
-    locale === 'vi'
-      ? `${nodeA.name} là ${labels.addressFromB} của ${nodeB.name}`
-      : `${nodeA.name} is the ${labels.addressFromB} of ${nodeB.name}`;
+  const templates: Record<Locale, (a: string, b: string, label: string) => string> = {
+    en: (a, b, label) => `${a} is the ${label} of ${b}`,
+    vi: (a, b, label) => `${a} là ${label} của ${b}`,
+    zh: (a, b, label) => `${a} 是 ${b} 的 ${label}`,
+    ko: (a, b, label) => `${a}은 ${b}의 ${label}`,
+    ja: (a, b, label) => `${a}は${b}の${label}`,
+    th: (a, b, label) => `${a} เป็น ${label} ของ ${b}`,
+  };
+
+  const description = (templates[locale] ?? templates.en)(nodeA.name, nodeB.name, labels.addressFromB);
 
   return {
     found: true,

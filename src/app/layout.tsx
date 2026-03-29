@@ -4,6 +4,7 @@ import './globals.css';
 import { getLocale, getMessages } from 'next-intl/server';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { LanguageProvider } from '@/components/LanguageProvider';
+import type { Locale } from '@/i18n';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -57,7 +58,7 @@ export default async function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <LanguageProvider defaultLocale={locale as 'en' | 'vi'} defaultMessages={messages}>
+        <LanguageProvider defaultLocale={locale as Locale} defaultMessages={messages}>
           <ThemeProvider>{children}</ThemeProvider>
         </LanguageProvider>
       </body>

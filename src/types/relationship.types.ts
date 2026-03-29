@@ -1,4 +1,5 @@
 import type { FamilyMember } from './tree.types';
+import type { Locale } from '@/i18n';
 
 export interface RelationshipAnalysis {
   found: boolean;
@@ -54,5 +55,5 @@ export interface ValidationResult {
 export interface RelationshipContext {
   nodeA: FamilyMember;
   nodeB: FamilyMember;
-  locale: 'en' | 'vi';
+  locale: Locale;
 }
