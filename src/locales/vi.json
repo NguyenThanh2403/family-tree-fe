@@ -1,6 +1,11 @@
 {
   "common": {
     "appName": "Family Tree+",
+    "metaDescription": "Quản lý gia phả trực tuyến — Khám phá, quản lý và phân tích lịch sử gia đình của bạn một cách tương tác.",
+    "metaKeywords": ["family tree", "gia phả", "phả hệ", "lịch sử gia đình", "quản lý gia phả"],
+    "ogTitle": "Family Tree+ — Quản lý gia phả",
+    "ogDescription": "Khám phá và lưu giữ lịch sử gia đình bạn.",
+    "skipToMain": "Bỏ qua đến nội dung chính",
     "loading": "Đang tải...",
     "pageNotFound": "Không tìm thấy trang này.",
     "goBackHome": "Quay về trang chủ",

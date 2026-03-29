@@ -1,6 +1,11 @@
 {
   "common": {
     "appName": "Family Tree+",
+    "metaDescription": "จัดการต้นไม้สกุลออนไลน์ — สำรวจ จัดการ และวิเคราะห์ประวัติครอบครัวของคุณอย่างโต้ตอบได้",
+    "metaKeywords": ["family tree", "ต้นไม้ครอบครัว", "genealogy", "ประวัติครอบครัว"],
+    "ogTitle": "Family Tree+ — จัดการต้นไม้ครอบครัว",
+    "ogDescription": "ค้นหาและเก็บรักษาประวัติครอบครัวของคุณ",
+    "skipToMain": "ข้ามไปยังเนื้อหาหลัก",
     "loading": "กำลังโหลด...",
     "pageNotFound": "ไม่พบหน้านี้",
     "goBackHome": "กลับไปหน้าหลัก",

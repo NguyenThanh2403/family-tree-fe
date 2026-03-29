@@ -1,6 +1,11 @@
 {
   "common": {
     "appName": "Family Tree+",
+    "metaDescription": "在线管理家谱 — 交互式探索、管理并分析您的家族历史。",
+    "metaKeywords": ["家谱", "family tree", "家族历史", "族谱"],
+    "ogTitle": "Family Tree+ — 管理家谱",
+    "ogDescription": "探索并保存您的家族历史。",
+    "skipToMain": "跳到主要内容",
     "loading": "加载中...",
     "pageNotFound": "未找到此页面。",
     "goBackHome": "返回主页",

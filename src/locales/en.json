@@ -1,6 +1,11 @@
 {
   "common": {
     "appName": "Family Tree+",
+    "metaDescription": "Manage your family tree online — Explore, manage, and analyze your family history interactively.",
+    "metaKeywords": ["family tree", "gia phả", "genealogy", "family history", "family-tree"],
+    "ogTitle": "Family Tree+ — Manage your family tree",
+    "ogDescription": "Preserve and explore your family history.",
+    "skipToMain": "Skip to main content",
     "loading": "Loading...",
     "pageNotFound": "This page could not be found.",
     "goBackHome": "Go back home",

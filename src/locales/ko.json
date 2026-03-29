@@ -1,6 +1,11 @@
 {
   "common": {
     "appName": "Family Tree+",
+    "metaDescription": "가계도를 온라인으로 관리하세요 — 가족사의 탐색, 관리 및 분석을 대화형으로 제공합니다.",
+    "metaKeywords": ["가계도", "family tree", "족보", "가족 역사"],
+    "ogTitle": "Family Tree+ — 가계도 관리",
+    "ogDescription": "가족 역사를 보존하고 탐색하세요.",
+    "skipToMain": "주요 콘텐츠로 건너뛰기",
     "loading": "로딩 중...",
     "pageNotFound": "이 페이지를 찾을 수 없습니다.",
     "goBackHome": "홈으로 돌아가기",

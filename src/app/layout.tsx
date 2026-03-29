@@ -16,21 +16,42 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Family Tree+',
-    template: '%s | Family Tree+',
-  },
-  description:
-    'Quản lý gia phả trực tuyến — Explore, manage, and analyze your family history interactively.',
-  keywords: ['family tree', 'gia phả', 'genealogy', 'phả hệ', 'Vietnam'],
-  openGraph: {
-    type: 'website',
-    siteName: 'Family Tree+',
-    title: 'Family Tree+ — Quản lý gia phả',
-    description: 'Khám phá và lưu giữ lịch sử gia đình bạn.',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
+  const appName = (messages as any)?.common?.appName ?? 'Family Tree+';
+  const description =
+    (messages as any)?.common?.metaDescription ??
+    'Quản lý gia phả trực tuyến — Explore, manage, and analyze your family history interactively.';
+  const keywordsRaw = (messages as any)?.common?.metaKeywords ?? [
+    'family tree',
+    'gia phả',
+    'genealogy',
+    'phả hệ',
+    'Vietnam',
+  ];
+  const keywords = Array.isArray(keywordsRaw)
+    ? keywordsRaw
+    : typeof keywordsRaw === 'string'
+    ? keywordsRaw.split(',').map((s: string) => s.trim())
+    : keywordsRaw;
+
+  return {
+    title: {
+      default: appName,
+      template: `%s | ${appName}`,
+    },
+    description,
+    keywords,
+    openGraph: {
+      type: 'website',
+      siteName: appName,
+      title: (messages as any)?.common?.ogTitle ?? `${appName} — Quản lý gia phả`,
+      description: (messages as any)?.common?.ogDescription ?? description,
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -56,7 +77,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
         <a href="#main-content" className="skip-link">
-          Skip to main content
+          {(messages as any)?.common?.skipToMain ?? 'Skip to main content'}
         </a>
         <LanguageProvider defaultLocale={locale as Locale} defaultMessages={messages}>
           <ThemeProvider>{children}</ThemeProvider>

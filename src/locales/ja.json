@@ -1,6 +1,11 @@
 {
   "common": {
     "appName": "Family Tree+",
+    "metaDescription": "家系図をオンラインで管理 — 家族の歴史をインタラクティブに探索・管理・解析します。",
+    "metaKeywords": ["家系図", "family tree", "家族の歴史", "系譜"],
+    "ogTitle": "Family Tree+ — 家系図管理",
+    "ogDescription": "ご家族の歴史を保存して探検しましょう。",
+    "skipToMain": "メインコンテンツへスキップ",
     "loading": "読み込み中...",
     "pageNotFound": "このページは見つかりませんでした。",
     "goBackHome": "ホームに戻る",
